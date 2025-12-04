@@ -1,6 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// AUTHENTICATION SYSTEM (localStorage)
-// ⚠️ WARNING: NOT SECURE - ONLY FOR DEMO PURPOSES
+// SIMPLE SAVE SYSTEM (localStorage without login)
 // ═══════════════════════════════════════════════════════════════════
 
 // Fallback WORLD_BOSSES if not defined
@@ -33,167 +32,9 @@ if (typeof WORLD_BOSSES === 'undefined') {
     ];
 }
 
-let currentUser = null;
-
-// Переключение между формами
-function toggleForms() {
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const messageBox = document.getElementById('messageBox');
-    
-    loginForm.classList.toggle('hidden');
-    registerForm.classList.toggle('hidden');
-    messageBox.innerHTML = '';
-    
-    // Очистить поля
-    document.getElementById('loginUsername').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('registerUsername').value = '';
-    document.getElementById('registerPassword').value = '';
-    document.getElementById('registerPasswordConfirm').value = '';
-}
-
-// Показ сообщения
-function showMessage(message, type = 'error') {
-    const messageBox = document.getElementById('messageBox');
-    const className = type === 'success' ? 'success-message' : 'error-message';
-    messageBox.innerHTML = `<div class="${className}">${message}</div>`;
-}
-
-// Регистрация
-function register() {
-    const username = document.getElementById('registerUsername').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-    
-    // Валидация
-    if (!username || !password || !passwordConfirm) {
-        showMessage('Заполните все поля!');
-        return;
-    }
-    
-    if (username.length < 3 || username.length > 20) {
-        showMessage('Логин должен быть от 3 до 20 символов!');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showMessage('Пароль должен быть минимум 6 символов!');
-        return;
-    }
-    
-    if (password !== passwordConfirm) {
-        showMessage('Пароли не совпадают!');
-        return;
-    }
-    
-    // Проверка существования пользователя
-    const users = JSON.parse(localStorage.getItem('rpg_users') || '{}');
-    if (users[username]) {
-        showMessage('Такой логин уже существует!');
-        return;
-    }
-    
-    // Создание аккаунта
-    users[username] = {
-        password: password, // ⚠️ НЕ БЕЗОПАСНО - пароль не зашифрован!
-        createdAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem('rpg_users', JSON.stringify(users));
-    
-    showMessage('✅ Аккаунт создан! Теперь вы можете войти.', 'success');
-    
-    // Автоматический вход через 2 секунды
-    setTimeout(() => {
-        document.getElementById('loginUsername').value = username;
-        document.getElementById('loginPassword').value = password;
-        toggleForms();
-    }, 1500);
-}
-
-// Вход
-function login() {
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!username || !password) {
-        showMessage('Введите логин и пароль!');
-        return;
-    }
-    
-    // Проверка креденшалов
-    const users = JSON.parse(localStorage.getItem('rpg_users') || '{}');
-    
-    if (!users[username]) {
-        showMessage('Пользователь не найден!');
-        return;
-    }
-    
-    if (users[username].password !== password) {
-        showMessage('Неверный пароль!');
-        return;
-    }
-    
-    // Успешный вход
-    currentUser = username;
-    localStorage.setItem('rpg_currentUser', username);
-    
-    // Загрузить сохранение игрока
-    loadPlayerData(username);
-    
-    // Показать игровой экран
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('gameScreen').classList.remove('hidden');
-    document.getElementById('logoutButton').classList.remove('hidden');
-    
-    // Загрузить боевую вкладку
-    if (typeof loadBattleTab === 'function') {
-        loadBattleTab('adventures');
-    }
-    
-    if (typeof updateUI === 'function') {
-        updateUI();
-    }
-    if (typeof loadShop === 'function') {
-        loadShop();
-    }
-    if (typeof loadQuests === 'function') {
-        loadQuests();
-    }
-}
-
-// Выход
-function logout() {
-    if (!confirm('Вы уверены, что хотите выйти?')) {
-        return;
-    }
-    
-    // Сохранить прогресс
-    if (typeof player !== 'undefined' && player && currentUser) {
-        savePlayerData();
-    }
-    
-    currentUser = null;
-    if (typeof player !== 'undefined') {
-        player = null;
-    }
-    localStorage.removeItem('rpg_currentUser');
-    
-    // Вернуться на экран входа
-    document.getElementById('gameScreen').classList.add('hidden');
-    document.getElementById('logoutButton').classList.add('hidden');
-    document.getElementById('loginScreen').classList.remove('hidden');
-    
-    // Очистить поля
-    document.getElementById('loginUsername').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('messageBox').innerHTML = '';
-}
-
 // Загрузка данных игрока
-function loadPlayerData(username) {
-    const savedData = localStorage.getItem(`rpg_player_${username}`);
+function loadPlayerData() {
+    const savedData = localStorage.getItem('rpg_player_save');
     
     if (savedData) {
         player = JSON.parse(savedData);
@@ -223,7 +64,7 @@ function loadPlayerData(username) {
     } else {
         // Создать нового персонажа
         player = {
-            username: username,
+            username: 'Герой',
             level: 1,
             experience: 0,
             hp: 100,
@@ -263,39 +104,30 @@ function loadPlayerData(username) {
 
 // Сохранение данных игрока
 function savePlayerData() {
-    if (currentUser && typeof player !== 'undefined' && player) {
-        localStorage.setItem(`rpg_player_${currentUser}`, JSON.stringify(player));
+    if (typeof player !== 'undefined' && player) {
+        localStorage.setItem('rpg_player_save', JSON.stringify(player));
     }
 }
 
-// Переопределение savePlayer() для работы с аккаунтами
+// Переопределение savePlayer() для совместимости
 function savePlayer() {
     savePlayerData();
 }
 
-// Проверка автовхода при загрузке страницы
+// Автозагрузка при загрузке страницы
 window.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('rpg_currentUser');
-    if (savedUser) {
-        // Автовход
-        currentUser = savedUser;
-        loadPlayerData(savedUser);
-        
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('gameScreen').classList.remove('hidden');
-        document.getElementById('logoutButton').classList.remove('hidden');
-        
-        if (typeof loadBattleTab === 'function') {
-            loadBattleTab('adventures');
-        }
-        if (typeof updateUI === 'function') {
-            updateUI();
-        }
-        if (typeof loadShop === 'function') {
-            loadShop();
-        }
-        if (typeof loadQuests === 'function') {
-            loadQuests();
-        }
+    loadPlayerData();
+    
+    if (typeof loadBattleTab === 'function') {
+        loadBattleTab('adventures');
+    }
+    if (typeof updateUI === 'function') {
+        updateUI();
+    }
+    if (typeof loadShop === 'function') {
+        loadShop();
+    }
+    if (typeof loadQuests === 'function') {
+        loadQuests();
     }
 });
