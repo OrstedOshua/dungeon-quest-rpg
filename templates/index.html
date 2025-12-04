@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Quest RPG</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="container">
+        <div class="login-box">
+            <h1>⚔️ Dungeon Quest ⚔️</h1>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Введите имя персонажа" maxlength="20">
+            </div>
+            <button class="btn" onclick="login()">Начать приключение</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="container hidden">
+        <!-- Left Panel: Character Info -->
+        <div>
+            <div class="card">
+                <h2>👤 Персонаж</h2>
+                <div class="character-info">
+                    <div class="stat-row">
+                        <span class="stat-label">Имя:</span>
+                        <span class="stat-value" id="playerName">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Уровень:</span>
+                        <span class="stat-value" id="playerLevel">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Золото:</span>
+                        <span class="stat-value" id="playerGold">-</span>
+                    </div>
+                    
+                    <div style="margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>❤️ HP:</span>
+                            <span id="playerHp">-</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="hpBar" style="width: 100%;">-</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>⭐ Опыт:</span>
+                            <span id="playerExp">-</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="expBar" style="width: 0%;">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-row">
+                        <span class="stat-label">⚔️ Сила:</span>
+                        <span class="stat-value" id="playerStrength">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🛡️ Защита:</span>
+                        <span class="stat-value" id="playerDefense">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">⚡ Ловкость:</span>
+                        <span class="stat-value" id="playerAgility">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <h2>🎒 Экипировка</h2>
+                <div class="equipment-slot">
+                    <strong>⚔️ Оружие:</strong>
+                    <div id="equippedWeapon">-</div>
+                </div>
+                <div class="equipment-slot">
+                    <strong>🛡️ Броня:</strong>
+                    <div id="equippedArmor">-</div>
+                </div>
+                <div class="equipment-slot">
+                    <strong>💍 Аксессуар:</strong>
+                    <div id="equippedAccessory">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel: Combat/Main Area -->
+        <div>
+            <div class="card combat-area">
+                <h2>⚔️ Приключения</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
+                    <button class="btn btn-secondary" onclick="healPlayer()" style="margin-left: 10px;">❤️ Лечиться (20 💰)</button>
+                </div>
+                
+                <div id="combatArea" class="hidden">
+                    <div class="monster-display">
+                        <h3 id="monsterName">-</h3>
+                        <div style="color: var(--text-secondary);">Уровень <span id="monsterLevel">-</span></div>
+                        <div class="monster-hp">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="monsterHpBar" style="width: 100%;">
+                                    <span id="monsterHp">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="combat-log" id="combatLog"></div>
+                    
+                    <div class="combat-buttons">
+                        <button class="btn" onclick="attack()">⚔️ Атаковать</button>
+                        <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
+                    </div>
+                    
+                    <div id="rewardDisplay" class="reward-display hidden"></div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <h2>📜 Квесты</h2>
+                <div id="questList" class="quest-list"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Shop & Inventory -->
+        <div>
+            <div class="card">
+                <h2>🏪 Магазин</h2>
+                <div id="shopItems" class="shop-items"></div>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <h2>🎒 Инвентарь</h2>
+                <div id="inventoryItems" class="inventory-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
