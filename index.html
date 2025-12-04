@@ -176,6 +176,42 @@
             box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
         }
 
+        /* Battle Sub-Tabs */
+        .battle-tabs {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .battle-tab-button {
+            flex: 1;
+            min-width: 140px;
+            padding: 10px 16px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .battle-tab-button:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .battle-tab-button.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(233, 69, 96, 0.3);
+        }
+
         /* Game Screen Layout */
         #gameScreen {
             display: grid;
@@ -274,7 +310,7 @@
             margin-bottom: 5px;
         }
 
-        /* Combat Area - FIXED positioning */
+        /* Combat Area */
         .combat-card {
             position: relative;
             min-height: 600px;
@@ -294,8 +330,7 @@
             flex-wrap: wrap;
         }
 
-        /* TRULY FIXED combat action buttons */
-        #combatActionButtons {
+        .combat-action-buttons {
             position: absolute;
             bottom: 20px;
             left: 20px;
@@ -488,7 +523,7 @@
             margin-bottom: 8px;
         }
 
-        /* Dungeons */
+        /* Dungeons & Bosses */
         .dungeon-card {
             background: var(--bg-secondary);
             padding: 20px;
@@ -641,7 +676,7 @@
                     <div id="equippedArmor">-</div>
                 </div>
                 <div class="equipment-slot">
-                    <strong>💍 Аксессуар:</strong>
+                    <strong>💍 Аксессуары:</strong>
                     <div id="equippedAccessory">-</div>
                 </div>
             </div>
@@ -649,13 +684,10 @@
 
         <!-- Right Panel: Tabbed Content -->
         <div>
-            <!-- Tab Navigation -->
+            <!-- Main Tab Navigation -->
             <div class="tabs-container">
                 <button class="tab-button active" data-tab="combat" onclick="switchTab(event, 'combat')">
                     ⚔️ Бой
-                </button>
-                <button class="tab-button" data-tab="dungeons" onclick="switchTab(event, 'dungeons')">
-                    🏰 Подземелья
                 </button>
                 <button class="tab-button" data-tab="inventory" onclick="switchTab(event, 'inventory')">
                     🎒 Инвентарь
@@ -668,96 +700,207 @@
                 </button>
             </div>
 
-            <!-- Combat Tab -->
+            <!-- Combat Tab (with sub-tabs) -->
             <div id="combatTab" class="tab-content active">
-                <div class="card combat-card">
-                    <h2>⚔️ Приключения</h2>
-                    
-                    <div class="combat-buttons" id="combatMainButtons">
-                        <button id="searchButton" class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
-                        <button class="btn btn-secondary" onclick="healPlayer()">❤️ Лечиться (20 💰)</button>
-                    </div>
-                    
-                    <div id="combatArea" class="hidden" style="margin-top: 20px;">
-                        <div class="combat-content">
-                            <div class="monster-display">
-                                <h3 id="monsterName">-</h3>
-                                <div style="color: var(--text-secondary); margin-bottom: 10px;">
-                                    Уровень <span id="monsterLevel">-</span> | 
-                                    ⚔️ <span id="monsterStrength">-</span> | 
-                                    🛡️ <span id="monsterDefense">-</span>
-                                </div>
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                        <span>HP:</span>
-                                        <span id="monsterHpText">-</span>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" id="monsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="combat-log" id="combatLog"></div>
-                            
-                            <div id="rewardDisplay" class="reward-display hidden"></div>
+                <!-- Battle Sub-Tabs -->
+                <div class="battle-tabs">
+                    <button class="battle-tab-button active" data-battle-tab="adventures" onclick="loadBattleTab('adventures')">
+                        🗡️ Приключения
+                    </button>
+                    <button class="battle-tab-button" data-battle-tab="dungeons" onclick="loadBattleTab('dungeons')">
+                        🏰 Подземелья
+                    </button>
+                    <button class="battle-tab-button" data-battle-tab="bosses" onclick="loadBattleTab('bosses')">
+                        👑 Боссы
+                    </button>
+                    <button class="battle-tab-button" data-battle-tab="worldBosses" onclick="loadBattleTab('worldBosses')">
+                        🌍 Мировые боссы
+                    </button>
+                </div>
+
+                <!-- Adventures Content -->
+                <div id="adventuresContent">
+                    <div class="card combat-card">
+                        <h2>⚔️ Приключения</h2>
+                        
+                        <div class="combat-buttons" id="combatMainButtons">
+                            <button id="searchButton" class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
+                            <button class="btn btn-secondary" onclick="healPlayer()">❤️ Лечиться (100 💰)</button>
                         </div>
                         
-                        <!-- Fixed combat action buttons OUTSIDE combat-content -->
-                        <div id="combatActionButtons">
-                            <div class="combat-buttons">
-                                <button id="attackButton" class="btn" onclick="attack()">⚔️ Атаковать</button>
-                                <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
+                        <div id="combatArea" class="hidden" style="margin-top: 20px;">
+                            <div class="combat-content">
+                                <div class="monster-display">
+                                    <h3 id="monsterName">-</h3>
+                                    <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                                        Уровень <span id="monsterLevel">-</span> | 
+                                        ⚔️ <span id="monsterStrength">-</span> | 
+                                        🛡️ <span id="monsterDefense">-</span>
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                            <span>HP:</span>
+                                            <span id="monsterHpText">-</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="monsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="combat-log" id="combatLog"></div>
+                                
+                                <div id="rewardDisplay" class="reward-display hidden"></div>
+                            </div>
+                            
+                            <div class="combat-action-buttons">
+                                <div class="combat-buttons">
+                                    <button id="attackButton" class="btn" onclick="attack()">⚔️ Атаковать</button>
+                                    <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Dungeons Tab -->
-            <div id="dungeonsTab" class="tab-content">
-                <div class="card">
-                    <h2>🏰 Подземелья</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Исследуйте опасные подземелья и сражайтесь с боссами</p>
-                    <div id="dungeonsList"></div>
-                </div>
+                <!-- Dungeons Content -->
+                <div id="dungeonsContent" class="hidden">
+                    <div class="card">
+                        <h2>🏰 Подземелья</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px;">Исследуйте опасные подземелья и сражайтесь с боссами</p>
+                        <div id="dungeonsList"></div>
+                    </div>
 
-                <!-- Dungeon Combat -->
-                <div id="dungeonCombatCard" class="card combat-card hidden">
-                    <h2 id="dungeonTitle">🏰 Подземелье</h2>
-                    
-                    <div id="dungeonCombatArea">
-                        <div class="combat-content">
-                            <div id="floorInfo" style="background: var(--bg-card); padding: 10px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid var(--warning);"></div>
-                            
-                            <div class="monster-display" id="dungeonMonsterDisplay">
-                                <h3 id="dungeonMonsterName">-</h3>
-                                <div style="color: var(--text-secondary); margin-bottom: 10px;">
-                                    Уровень <span id="dungeonMonsterLevel">-</span> | 
-                                    ⚔️ <span id="dungeonMonsterStrength">-</span> | 
-                                    🛡️ <span id="dungeonMonsterDefense">-</span>
-                                </div>
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                        <span>HP:</span>
-                                        <span id="dungeonMonsterHpText">-</span>
+                    <!-- Dungeon Combat -->
+                    <div id="dungeonCombatCard" class="card combat-card hidden">
+                        <h2 id="dungeonTitle">🏰 Подземелье</h2>
+                        
+                        <div id="dungeonCombatArea">
+                            <div class="combat-content">
+                                <div id="floorInfo" style="background: var(--bg-card); padding: 10px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid var(--warning);"></div>
+                                
+                                <div class="monster-display" id="dungeonMonsterDisplay">
+                                    <h3 id="dungeonMonsterName">-</h3>
+                                    <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                                        Уровень <span id="dungeonMonsterLevel">-</span> | 
+                                        ⚔️ <span id="dungeonMonsterStrength">-</span> | 
+                                        🛡️ <span id="dungeonMonsterDefense">-</span>
                                     </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" id="dungeonMonsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                            <span>HP:</span>
+                                            <span id="dungeonMonsterHpText">-</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="dungeonMonsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                <div class="combat-log" id="dungeonCombatLog"></div>
+                                
+                                <div id="dungeonRewardDisplay" class="reward-display hidden"></div>
                             </div>
                             
-                            <div class="combat-log" id="dungeonCombatLog"></div>
-                            
-                            <div id="dungeonRewardDisplay" class="reward-display hidden"></div>
+                            <div class="combat-action-buttons">
+                                <div class="combat-buttons">
+                                    <button id="dungeonAttackButton" class="btn" onclick="dungeonAttack()">⚔️ Атаковать</button>
+                                    <button class="btn btn-secondary" onclick="exitDungeon()">🚪 Выйти из подземелья</button>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Bosses Content -->
+                <div id="bossesContent" class="hidden">
+                    <div class="card">
+                        <h2>👑 Боссы</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px;">Сразитесь с могущественными боссами. Билеты падают с монстров (14% шанс)</p>
+                        <div id="bossesList"></div>
+                    </div>
+
+                    <!-- Boss Combat -->
+                    <div id="bossCombatCard" class="card combat-card hidden">
+                        <h2 id="bossTitle">👑 Босс</h2>
                         
-                        <!-- Fixed dungeon action buttons -->
-                        <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; background: var(--bg-card); padding: 15px; border-radius: 12px; box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3); z-index: 100;">
-                            <div class="combat-buttons">
-                                <button id="dungeonAttackButton" class="btn" onclick="dungeonAttack()">⚔️ Атаковать</button>
-                                <button class="btn btn-secondary" onclick="exitDungeon()">🚪 Выйти из подземелья</button>
+                        <div id="bossCombatArea">
+                            <div class="combat-content">
+                                <div class="monster-display" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, #1a1534 100%); border-color: var(--accent-secondary);">
+                                    <h3 id="bossMonsterName">-</h3>
+                                    <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                                        Уровень <span id="bossMonsterLevel">-</span> | 
+                                        ⚔️ <span id="bossMonsterStrength">-</span> | 
+                                        🛡️ <span id="bossMonsterDefense">-</span>
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                            <span>HP:</span>
+                                            <span id="bossMonsterHpText">-</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="bossMonsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="combat-log" id="bossCombatLog"></div>
+                                
+                                <div id="bossRewardDisplay" class="reward-display hidden"></div>
+                            </div>
+                            
+                            <div class="combat-action-buttons">
+                                <div class="combat-buttons">
+                                    <button id="bossAttackButton" class="btn" onclick="bossAttack()">⚔️ Атаковать</button>
+                                    <button class="btn btn-secondary" onclick="exitBoss()">🚪 Покинуть бой</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- World Bosses Content -->
+                <div id="worldBossesContent" class="hidden">
+                    <div class="card">
+                        <h2>🌍 Мировые боссы</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px;">Эпические боссы с сохранением прогресса урона. Требуют билеты к мировым боссам (100% дроп с боссов)</p>
+                        <div id="worldBossesList"></div>
+                    </div>
+
+                    <!-- World Boss Combat -->
+                    <div id="worldBossCombatCard" class="card combat-card hidden">
+                        <h2 id="worldBossTitle">🌍 Мировой босс</h2>
+                        
+                        <div id="worldBossCombatArea">
+                            <div class="combat-content">
+                                <div class="monster-display" style="background: linear-gradient(135deg, #1a1534 0%, #2d1b3d 100%); border-color: var(--accent-secondary);">
+                                    <h3 id="wbMonsterName">-</h3>
+                                    <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                                        Уровень <span id="wbMonsterLevel">-</span> | 
+                                        ⚔️ <span id="wbMonsterStrength">-</span> | 
+                                        🛡️ <span id="wbMonsterDefense">-</span>
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                            <span>HP:</span>
+                                            <span id="wbMonsterHpText">-</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="wbMonsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="combat-log" id="worldBossCombatLog"></div>
+                                
+                                <div id="worldBossRewardDisplay" class="reward-display hidden"></div>
+                            </div>
+                            
+                            <div class="combat-action-buttons">
+                                <div class="combat-buttons">
+                                    <button id="worldBossAttackButton" class="btn" onclick="worldBossAttack()">⚔️ Атаковать</button>
+                                    <button class="btn btn-secondary" onclick="exitWorldBoss()">🚪 Покинуть бой</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -777,7 +920,7 @@
             <div id="shopTab" class="tab-content">
                 <div class="card">
                     <h2>🏪 Магазин</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Покупайте оружие, броню, аксессуары и расходники</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Покупайте оружие, броню, аксессуары, дополнительные слоты и расходники</p>
                     <div id="shopItems" class="shop-items"></div>
                 </div>
             </div>
@@ -786,7 +929,7 @@
             <div id="questsTab" class="tab-content">
                 <div class="card">
                     <h2>📜 Квесты</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Выполняйте задания и получайте награды</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Выполняйте задания и получайте награды. Новые квесты появляются автоматически!</p>
                     <div id="questList" class="quest-list"></div>
                 </div>
             </div>
