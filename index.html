@@ -356,7 +356,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3px solid var(--accent-primary);
+            border-left: 3px солид var(--accent-primary);
             transition: transform 0.2s;
         }
 
@@ -594,16 +594,16 @@
         <div>
             <!-- Tab Navigation -->
             <div class="tabs-container">
-                <button class="tab-button active" onclick="switchTab('combat')">
+                <button class="tab-button active" data-tab="combat" onclick="switchTab(event, 'combat')">
                     ⚔️ Бой
                 </button>
-                <button class="tab-button" onclick="switchTab('inventory')">
+                <button class="tab-button" data-tab="inventory" onclick="switchTab(event, 'inventory')">
                     🎒 Инвентарь
                 </button>
-                <button class="tab-button" onclick="switchTab('shop')">
+                <button class="tab-button" data-tab="shop" onclick="switchTab(event, 'shop')">
                     🏪 Магазин
                 </button>
-                <button class="tab-button" onclick="switchTab('quests')">
+                <button class="tab-button" data-tab="quests" onclick="switchTab(event, 'quests')">
                     📜 Квесты
                 </button>
             </div>
@@ -613,8 +613,8 @@
                 <div class="card">
                     <h2>⚔️ Приключения</h2>
                     
-                    <div class="combat-buttons">
-                        <button class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
+                    <div class="combat-buttons" id="combatMainButtons">
+                        <button id="searchButton" class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
                         <button class="btn btn-secondary" onclick="healPlayer()">❤️ Лечиться (20 💰)</button>
                     </div>
                     
@@ -639,8 +639,8 @@
                         
                         <div class="combat-log" id="combatLog"></div>
                         
-                        <div class="combat-buttons">
-                            <button class="btn" onclick="attack()">⚔️ Атаковать</button>
+                        <div class="combat-buttons" id="combatActionButtons">
+                            <button id="attackButton" class="btn" onclick="attack()">⚔️ Атаковать</button>
                             <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
                         </div>
                         
@@ -662,7 +662,7 @@
             <div id="shopTab" class="tab-content">
                 <div class="card">
                     <h2>🏪 Магазин</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Покупайте оружие, броню и аксессуары</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Покупайте оружие, броню, аксессуары и расходники</p>
                     <div id="shopItems" class="shop-items"></div>
                 </div>
             </div>
@@ -681,34 +681,52 @@
     <script>
         // Game Data
         const ITEMS = [
+            // Weapons
             {name: 'Деревянный меч', type: 'weapon', damage: 5, price: 0, level: 1, desc: 'Базовое оружие'},
             {name: 'Железный меч', type: 'weapon', damage: 15, price: 50, level: 3, desc: 'Прочный железный клинок'},
             {name: 'Стальной клинок', type: 'weapon', damage: 25, price: 150, level: 5, desc: 'Острое стальное оружие'},
-            {name: 'Драконобоец', type: 'weapon', damage: 50, price: 500, level: 10, desc: 'Легендарный меч'},
+            {name: 'Боевой топор', type: 'weapon', damage: 35, price: 250, level: 7, desc: 'Тяжелый топор для ближнего боя'},
+            {name: 'Молот паладина', type: 'weapon', damage: 45, price: 400, level: 9, desc: 'Освященный боевой молот'},
+            {name: 'Драконобоец', type: 'weapon', damage: 60, price: 700, level: 12, desc: 'Легендарный меч'},
             
+            // Armor
             {name: 'Тканевая броня', type: 'armor', defense: 3, price: 0, level: 1, desc: 'Простая защита'},
             {name: 'Кожаная броня', type: 'armor', defense: 8, price: 40, level: 2, desc: 'Легкая кожаная защита'},
             {name: 'Железная броня', type: 'armor', defense: 15, price: 120, level: 5, desc: 'Тяжелая железная защита'},
-            {name: 'Драконья чешуя', type: 'armor', defense: 30, price: 600, level: 12, desc: 'Броня из чешуи дракона'},
+            {name: 'Стальная броня', type: 'armor', defense: 22, price: 220, level: 7, desc: 'Усиленная стальная броня'},
+            {name: 'Чёрный кирас', type: 'armor', defense: 28, price: 350, level: 9, desc: 'Тёмная усиленная броня'},
+            {name: 'Драконья чешуя', type: 'armor', defense: 40, price: 800, level: 13, desc: 'Броня из чешуи дракона'},
             
+            // Accessories
             {name: 'Кольцо силы', type: 'accessory', damage: 5, price: 100, level: 3, desc: '+5 Силы'},
             {name: 'Амулет защиты', type: 'accessory', defense: 5, price: 100, level: 3, desc: '+5 Защиты'},
             {name: 'Сапоги скорости', type: 'accessory', agility: 5, price: 100, level: 3, desc: '+5 Ловкости'},
             {name: 'Кулон здоровья', type: 'accessory', hp: 50, price: 150, level: 5, desc: '+50 Макс. HP'},
+            {name: 'Пояс берсерка', type: 'accessory', damage: 8, defense: -2, price: 200, level: 6, desc: '+8 Силы, -2 Защиты'},
+            {name: 'Щит веры', type: 'accessory', defense: 10, hp: 30, price: 260, level: 8, desc: '+10 Защиты, +30 HP'},
             
+            // Consumables
             {name: 'Зелье здоровья', type: 'consumable', heal: 50, price: 20, level: 1, desc: 'Восстанавливает 50 HP'},
-            {name: 'Большое зелье', type: 'consumable', heal: 150, price: 50, level: 5, desc: 'Восстанавливает 150 HP'}
+            {name: 'Большое зелье', type: 'consumable', heal: 150, price: 50, level: 5, desc: 'Восстанавливает 150 HP'},
+            {name: 'Эликсир героя', type: 'consumable', heal: 300, price: 120, level: 8, desc: 'Сильно восстанавливает здоровье'},
+            {name: 'Боевой тоник', type: 'consumable', heal: 0, price: 80, level: 6, buff: {strength: 5}, duration: 3, desc: '+5 Силы на несколько боев (пока без реализации)'}
         ];
 
         const MONSTERS = [
             {name: 'Слизень', level: 1, hp: 30, strength: 5, defense: 2, exp: 15, gold: 10, loot: {'Зелье здоровья': 0.3}},
+            {name: 'Крысиный вор', level: 1, hp: 35, strength: 6, defense: 1, exp: 18, gold: 15, loot: {'Зелье здоровья': 0.25}},
             {name: 'Гигантская крыса', level: 2, hp: 50, strength: 8, defense: 3, exp: 25, gold: 15, loot: {'Зелье здоровья': 0.4}},
             {name: 'Гоблин', level: 3, hp: 70, strength: 12, defense: 5, exp: 40, gold: 25, loot: {'Зелье здоровья': 0.3, 'Железный меч': 0.1}},
+            {name: 'Гоблин-ремесленник', level: 4, hp: 80, strength: 13, defense: 6, exp: 55, gold: 35, loot: {'Кожаная броня': 0.15, 'Зелье здоровья': 0.4}},
             {name: 'Волк', level: 4, hp: 90, strength: 15, defense: 6, exp: 60, gold: 35, loot: {'Зелье здоровья': 0.5, 'Кожаная броня': 0.1}},
-            {name: 'Орк', level: 6, hp: 120, strength: 20, defense: 8, exp: 100, gold: 50, loot: {'Большое зелье': 0.3, 'Железный меч': 0.15}},
-            {name: 'Темный рыцарь', level: 8, hp: 180, strength: 30, defense: 12, exp: 200, gold: 80, loot: {'Большое зелье': 0.4, 'Стальной клинок': 0.1}},
-            {name: 'Тролль', level: 10, hp: 250, strength: 40, defense: 15, exp: 350, gold: 120, loot: {'Большое зелье': 0.5, 'Железная броня': 0.15}},
-            {name: 'Дракон', level: 15, hp: 500, strength: 60, defense: 20, exp: 800, gold: 300, loot: {'Драконобоец': 0.05, 'Драконья чешуя': 0.1, 'Большое зелье': 0.8}}
+            {name: 'Ледяной волк', level: 5, hp: 110, strength: 18, defense: 7, exp: 80, gold: 45, loot: {'Стальной клинок': 0.1, 'Большое зелье': 0.4}},
+            {name: 'Орк', level: 6, hp: 130, strength: 22, defense: 8, exp: 110, gold: 60, loot: {'Большое зелье': 0.3, 'Железный меч': 0.15}},
+            {name: 'Орк-берсерк', level: 7, hp: 160, strength: 28, defense: 9, exp: 150, gold: 80, loot: {'Боевой топор': 0.12, 'Боевой тоник': 0.4}},
+            {name: 'Темный рыцарь', level: 8, hp: 200, strength: 32, defense: 12, exp: 220, gold: 90, loot: {'Большое зелье': 0.4, 'Стальной клинок': 0.1, 'Стальная броня': 0.1}},
+            {name: 'Призрачный страж', level: 9, hp: 220, strength: 34, defense: 14, exp: 260, gold: 110, loot: {'Чёрный кирас': 0.12, 'Щит веры': 0.15}},
+            {name: 'Тролль', level: 10, hp: 260, strength: 40, defense: 15, exp: 360, gold: 140, loot: {'Большое зелье': 0.5, 'Железная броня': 0.15}},
+            {name: 'Горный тролль', level: 11, hp: 310, strength: 45, defense: 18, exp: 450, gold: 180, loot: {'Эликсир героя': 0.4, 'Пояс берсерка': 0.15}},
+            {name: 'Дракон', level: 15, hp: 550, strength: 65, defense: 22, exp: 850, gold: 320, loot: {'Драконобоец': 0.06, 'Драконья чешуя': 0.12, 'Большое зелье': 0.8, 'Эликсир героя': 0.6}}
         ];
 
         const QUESTS = [
@@ -728,29 +746,18 @@
         let inCombat = false;
 
         // Tab Switching
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active from all buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
+        function switchTab(evt, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabName + 'Tab').classList.add('active');
-            
-            // Mark button as active
-            event.target.classList.add('active');
+            evt.currentTarget.classList.add('active');
         }
 
         // Initialize
         function initGame() {
             const savedPlayer = localStorage.getItem('dungeonQuestPlayer');
             if (savedPlayer) {
-                // Auto-login if player exists
+                // Можно сделать автологин позже
             }
         }
 
@@ -780,7 +787,6 @@
 
             player = loadPlayer(username);
             if (!player) {
-                // Create new player
                 player = {
                     username: username,
                     level: 1,
@@ -940,6 +946,11 @@
             
             document.getElementById('combatLog').innerHTML = '<div class="log-entry">⚔️ Бой начался!</div>';
             document.getElementById('rewardDisplay').classList.add('hidden');
+            
+            // В бою кнопка внизу должна быть "Атаковать"
+            const attackBtn = document.getElementById('attackButton');
+            attackBtn.textContent = '⚔️ Атаковать';
+            attackBtn.onclick = attack;
         }
 
         function updateMonsterHP() {
@@ -954,7 +965,6 @@
             if (!inCombat) return;
             
             const stats = getStats();
-            const logDiv = document.getElementById('combatLog');
             
             // Player attacks
             const playerDmg = Math.max(1, stats.strength + Math.floor(Math.random() * 7) - 3 - currentMonster.defense);
@@ -1039,6 +1049,11 @@
             
             updateUI();
             loadQuests();
+            
+            // После победы кнопка Атаковать превращается в Искать противника
+            const attackBtn = document.getElementById('attackButton');
+            attackBtn.textContent = '🗡️ Искать противника';
+            attackBtn.onclick = startCombat;
         }
 
         function defeat() {
@@ -1048,12 +1063,20 @@
             player.hp = getStats().maxHp;
             document.getElementById('combatArea').classList.add('hidden');
             updateUI();
+            
+            const attackBtn = document.getElementById('attackButton');
+            attackBtn.textContent = '⚔️ Атаковать';
+            attackBtn.onclick = attack;
         }
 
         function fleeCombat() {
             inCombat = false;
             currentMonster = null;
             document.getElementById('combatArea').classList.add('hidden');
+            
+            const attackBtn = document.getElementById('attackButton');
+            attackBtn.textContent = '⚔️ Атаковать';
+            attackBtn.onclick = attack;
         }
 
         // Heal
@@ -1081,7 +1104,9 @@
             const shopDiv = document.getElementById('shopItems');
             shopDiv.innerHTML = '';
             
-            const shopItems = ITEMS.filter(item => item.type !== 'consumable');
+            const shopItems = ITEMS.filter(item => item.type !== 'consumable').concat(
+                ITEMS.filter(item => item.type === 'consumable')
+            );
             
             if (shopItems.length === 0) {
                 shopDiv.innerHTML = '<div class="empty-state">Магазин пуст</div>';
@@ -1097,6 +1122,7 @@
                 if (item.defense) stats.push(`🛡️ Защита: +${item.defense}`);
                 if (item.agility) stats.push(`⚡ Ловкость: +${item.agility}`);
                 if (item.hp) stats.push(`❤️ HP: +${item.hp}`);
+                if (item.heal) stats.push(`❤️ Лечение: ${item.heal}`);
                 
                 const canBuy = player.level >= item.level && player.gold >= item.price;
                 
@@ -1134,14 +1160,16 @@
             
             player.gold -= item.price;
             
-            // Auto-equip
             if (item.type === 'weapon') player.weapon = item.name;
             else if (item.type === 'armor') player.armor = item.name;
             else if (item.type === 'accessory') player.accessory = item.name;
+            else if (item.type === 'consumable') {
+                player.inventory[item.name] = (player.inventory[item.name] || 0) + 1;
+            }
             
             updateUI();
             loadShop();
-            alert(`✅ Куплено и экипировано: ${item.name}`);
+            alert(`✅ Куплено: ${item.name}`);
         }
 
         // Quests
@@ -1196,7 +1224,6 @@
                 player.inventory[quest.item] = (player.inventory[quest.item] || 0) + 1;
             }
             
-            // Check level up
             const expNeeded = Math.floor(100 * Math.pow(1.5, player.level - 1));
             if (player.experience >= expNeeded) {
                 player.level++;
