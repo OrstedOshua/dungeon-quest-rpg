@@ -274,7 +274,19 @@
             margin-bottom: 5px;
         }
 
-        /* Combat Area */
+        /* Combat Area - FIXED positioning */
+        .combat-card {
+            position: relative;
+            min-height: 600px;
+            padding-bottom: 100px;
+        }
+
+        .combat-content {
+            max-height: calc(600px - 120px);
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
         .combat-buttons {
             display: flex;
             gap: 10px;
@@ -282,16 +294,17 @@
             flex-wrap: wrap;
         }
 
-        /* Fixed position for combat action buttons */
+        /* TRULY FIXED combat action buttons */
         #combatActionButtons {
-            position: sticky;
-            bottom: 0;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             background: var(--bg-card);
             padding: 15px;
             border-radius: 12px;
-            margin-top: 15px;
             box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 10;
+            z-index: 100;
         }
 
         .monster-display {
@@ -314,7 +327,7 @@
             background: var(--bg-secondary);
             padding: 15px;
             border-radius: 8px;
-            max-height: 250px;
+            max-height: 200px;
             overflow-y: auto;
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
@@ -634,7 +647,7 @@
 
             <!-- Combat Tab -->
             <div id="combatTab" class="tab-content active">
-                <div class="card">
+                <div class="card combat-card">
                     <h2>⚔️ Приключения</h2>
                     
                     <div class="combat-buttons" id="combatMainButtons">
@@ -643,29 +656,31 @@
                     </div>
                     
                     <div id="combatArea" class="hidden" style="margin-top: 20px;">
-                        <div class="monster-display">
-                            <h3 id="monsterName">-</h3>
-                            <div style="color: var(--text-secondary); margin-bottom: 10px;">
-                                Уровень <span id="monsterLevel">-</span> | 
-                                ⚔️ <span id="monsterStrength">-</span> | 
-                                🛡️ <span id="monsterDefense">-</span>
-                            </div>
-                            <div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                    <span>HP:</span>
-                                    <span id="monsterHpText">-</span>
+                        <div class="combat-content">
+                            <div class="monster-display">
+                                <h3 id="monsterName">-</h3>
+                                <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                                    Уровень <span id="monsterLevel">-</span> | 
+                                    ⚔️ <span id="monsterStrength">-</span> | 
+                                    🛡️ <span id="monsterDefense">-</span>
                                 </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="monsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>HP:</span>
+                                        <span id="monsterHpText">-</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="monsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                    </div>
                                 </div>
                             </div>
+                            
+                            <div class="combat-log" id="combatLog"></div>
+                            
+                            <div id="rewardDisplay" class="reward-display hidden"></div>
                         </div>
                         
-                        <div class="combat-log" id="combatLog"></div>
-                        
-                        <div id="rewardDisplay" class="reward-display hidden"></div>
-                        
-                        <!-- Fixed combat action buttons -->
+                        <!-- Fixed combat action buttons OUTSIDE combat-content -->
                         <div id="combatActionButtons">
                             <div class="combat-buttons">
                                 <button id="attackButton" class="btn" onclick="attack()">⚔️ Атаковать</button>
