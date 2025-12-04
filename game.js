@@ -743,6 +743,13 @@ function startCombat() {
     
     document.getElementById('combatLog').innerHTML = '<div class="log-entry">⚔️ Бой начался!</div>';
     document.getElementById('rewardDisplay').classList.add('hidden');
+    
+    // после начала боя кнопка должна быть именно "Атаковать"
+    const attackBtn = document.getElementById('attackButton');
+    if (attackBtn) {
+        attackBtn.textContent = '⚔️ Атаковать';
+        attackBtn.onclick = attack;
+    }
 }
 
 function updateMonsterHP() {
@@ -834,6 +841,13 @@ function victory() {
         <div class="reward-item">⭐ Опыт: +${currentMonster.exp}</div>
         ${loot.length > 0 ? `<div class="reward-item">🎁 Добыча: ${loot.join(', ')}</div>` : ''}
     `;
+    
+    // после победы меняем кнопку на "Искать противника"
+    const attackBtn = document.getElementById('attackButton');
+    if (attackBtn) {
+        attackBtn.textContent = '🗡️ Искать противника';
+        attackBtn.onclick = startCombat;
+    }
     
     updateUI();
     loadQuests();
@@ -1273,7 +1287,7 @@ function startDungeonFloor() {
                 padding: 30px;
                 border-radius: 12px;
                 margin-bottom: 20px;
-                border: 2px solid var(--accent-secondary);
+                border: 2px солид var(--accent-secondary);
                 text-align: center;
             `;
         }
