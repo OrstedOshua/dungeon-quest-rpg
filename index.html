@@ -133,16 +133,64 @@
         }
 
         .btn-small {
-            padding: 6px 12px;
+            padding: 8px 16px;
             font-size: 14px;
         }
 
-        /* Game Screen */
+        /* Tab Navigation */
+        .tabs-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-button:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+        }
+
+        /* Game Screen Layout */
         #gameScreen {
             display: grid;
-            grid-template-columns: 320px 1fr 320px;
+            grid-template-columns: 350px 1fr;
             gap: 20px;
             margin-top: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
         }
 
         /* Card Styles */
@@ -152,6 +200,7 @@
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             animation: fadeIn 0.5s ease-out;
+            margin-bottom: 20px;
         }
 
         .card h2 {
@@ -254,7 +303,7 @@
             background: var(--bg-secondary);
             padding: 15px;
             border-radius: 8px;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
@@ -291,12 +340,12 @@
             border-left: 3px solid var(--success);
         }
 
-        /* Shop */
+        /* Shop & Lists */
         .shop-items, .quest-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 500px;
+            max-height: 600px;
             overflow-y: auto;
         }
 
@@ -372,8 +421,8 @@
         /* Inventory */
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
         }
 
         .inventory-item {
@@ -394,11 +443,12 @@
         .item-count {
             background: var(--accent-primary);
             color: white;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 12px;
             font-size: 12px;
-            margin-top: 5px;
+            margin-top: 8px;
             display: inline-block;
+            font-weight: bold;
         }
 
         /* Scrollbar */
@@ -452,8 +502,9 @@
         .empty-state {
             text-align: center;
             color: var(--text-secondary);
-            padding: 20px;
+            padding: 40px 20px;
             font-style: italic;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -471,7 +522,7 @@
 
     <!-- Game Screen -->
     <div id="gameScreen" class="container hidden">
-        <!-- Left Panel: Character Info -->
+        <!-- Left Panel: Character Stats -->
         <div>
             <div class="card">
                 <h2>👤 Персонаж</h2>
@@ -522,7 +573,7 @@
                 </div>
             </div>
             
-            <div class="card" style="margin-top: 20px;">
+            <div class="card">
                 <h2>🎲 Экипировка</h2>
                 <div class="equipment-slot">
                     <strong>⚔️ Оружие:</strong>
@@ -539,62 +590,90 @@
             </div>
         </div>
 
-        <!-- Center Panel: Combat/Main Area -->
+        <!-- Right Panel: Tabbed Content -->
         <div>
-            <div class="card">
-                <h2>⚔️ Приключения</h2>
-                
-                <div class="combat-buttons">
-                    <button class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
-                    <button class="btn btn-secondary" onclick="healPlayer()">❤️ Лечиться (20 💰)</button>
-                </div>
-                
-                <div id="combatArea" class="hidden" style="margin-top: 20px;">
-                    <div class="monster-display">
-                        <h3 id="monsterName">-</h3>
-                        <div style="color: var(--text-secondary); margin-bottom: 10px;">
-                            Уровень <span id="monsterLevel">-</span> | 
-                            ⚔️ <span id="monsterStrength">-</span> | 
-                            🛡️ <span id="monsterDefense">-</span>
-                        </div>
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>HP:</span>
-                                <span id="monsterHpText">-</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="monsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="combat-log" id="combatLog"></div>
+            <!-- Tab Navigation -->
+            <div class="tabs-container">
+                <button class="tab-button active" onclick="switchTab('combat')">
+                    ⚔️ Бой
+                </button>
+                <button class="tab-button" onclick="switchTab('inventory')">
+                    🎒 Инвентарь
+                </button>
+                <button class="tab-button" onclick="switchTab('shop')">
+                    🏪 Магазин
+                </button>
+                <button class="tab-button" onclick="switchTab('quests')">
+                    📜 Квесты
+                </button>
+            </div>
+
+            <!-- Combat Tab -->
+            <div id="combatTab" class="tab-content active">
+                <div class="card">
+                    <h2>⚔️ Приключения</h2>
                     
                     <div class="combat-buttons">
-                        <button class="btn" onclick="attack()">⚔️ Атаковать</button>
-                        <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
+                        <button class="btn btn-success" onclick="startCombat()">🗡️ Искать противника</button>
+                        <button class="btn btn-secondary" onclick="healPlayer()">❤️ Лечиться (20 💰)</button>
                     </div>
                     
-                    <div id="rewardDisplay" class="reward-display hidden"></div>
+                    <div id="combatArea" class="hidden" style="margin-top: 20px;">
+                        <div class="monster-display">
+                            <h3 id="monsterName">-</h3>
+                            <div style="color: var(--text-secondary); margin-bottom: 10px;">
+                                Уровень <span id="monsterLevel">-</span> | 
+                                ⚔️ <span id="monsterStrength">-</span> | 
+                                🛡️ <span id="monsterDefense">-</span>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>HP:</span>
+                                    <span id="monsterHpText">-</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="monsterHpBar" style="width: 100%; background: linear-gradient(90deg, #f56565, #c73851);">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="combat-log" id="combatLog"></div>
+                        
+                        <div class="combat-buttons">
+                            <button class="btn" onclick="attack()">⚔️ Атаковать</button>
+                            <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
+                        </div>
+                        
+                        <div id="rewardDisplay" class="reward-display hidden"></div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="card" style="margin-top: 20px;">
-                <h2>📜 Квесты</h2>
-                <div id="questList" class="quest-list"></div>
-            </div>
-        </div>
 
-        <!-- Right Panel: Shop & Inventory -->
-        <div>
-            <div class="card">
-                <h2>🏪 Магазин</h2>
-                <div id="shopItems" class="shop-items"></div>
+            <!-- Inventory Tab -->
+            <div id="inventoryTab" class="tab-content">
+                <div class="card">
+                    <h2>🎒 Инвентарь</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Кликните на зелье, чтобы использовать</p>
+                    <div id="inventoryItems" class="inventory-grid"></div>
+                </div>
             </div>
-            
-            <div class="card" style="margin-top: 20px;">
-                <h2>🎒 Инвентарь</h2>
-                <div id="inventoryItems" class="inventory-grid"></div>
+
+            <!-- Shop Tab -->
+            <div id="shopTab" class="tab-content">
+                <div class="card">
+                    <h2>🏪 Магазин</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Покупайте оружие, броню и аксессуары</p>
+                    <div id="shopItems" class="shop-items"></div>
+                </div>
+            </div>
+
+            <!-- Quests Tab -->
+            <div id="questsTab" class="tab-content">
+                <div class="card">
+                    <h2>📜 Квесты</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Выполняйте задания и получайте награды</p>
+                    <div id="questList" class="quest-list"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -647,6 +726,25 @@
         let player = null;
         let currentMonster = null;
         let inCombat = false;
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Mark button as active
+            event.target.classList.add('active');
+        }
 
         // Initialize
         function initGame() {
@@ -773,16 +871,16 @@
                     const itemData = ITEMS.find(i => i.name === item);
                     if (itemData && itemData.type === 'consumable') {
                         itemDiv.onclick = () => useItem(item);
-                        itemDiv.style.cursor = 'pointer';
+                        itemDiv.title = 'Кликните, чтобы использовать';
                     }
                     itemDiv.innerHTML = `
-                        <div style="font-size: 13px;">${item}</div>
+                        <div style="font-size: 14px; font-weight: 600;">${item}</div>
                         <span class="item-count">x${count}</span>
                     `;
                     invDiv.appendChild(itemDiv);
                 }
             } else {
-                invDiv.innerHTML = '<div class="empty-state">Инвентарь пуст</div>';
+                invDiv.innerHTML = '<div class="empty-state">Инвентарь пуст<br>🎒<br>Побеждайте монстров, чтобы получить предметы!</div>';
             }
             
             savePlayer();
@@ -811,7 +909,7 @@
             }
             
             updateUI();
-            alert(`Использовано: ${itemName}\nВосстановлено ${item.heal} HP`);
+            alert(`✅ Использовано: ${itemName}\n❤️ Восстановлено ${item.heal} HP`);
         }
 
         // Start Combat
@@ -975,7 +1073,7 @@
             player.gold -= cost;
             player.hp = stats.maxHp;
             updateUI();
-            alert(`Вы восстановили здоровье за ${cost} золота`);
+            alert(`✅ Вы восстановили здоровье за ${cost} золота`);
         }
 
         // Shop
@@ -983,7 +1081,14 @@
             const shopDiv = document.getElementById('shopItems');
             shopDiv.innerHTML = '';
             
-            ITEMS.filter(item => item.type !== 'consumable').forEach(item => {
+            const shopItems = ITEMS.filter(item => item.type !== 'consumable');
+            
+            if (shopItems.length === 0) {
+                shopDiv.innerHTML = '<div class="empty-state">Магазин пуст</div>';
+                return;
+            }
+            
+            shopItems.forEach(item => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'shop-item';
                 
@@ -1036,7 +1141,7 @@
             
             updateUI();
             loadShop();
-            alert(`Куплено и экипировано: ${item.name}`);
+            alert(`✅ Куплено и экипировано: ${item.name}`);
         }
 
         // Quests
@@ -1047,7 +1152,7 @@
             const availableQuests = QUESTS.filter(q => q.level <= player.level);
             
             if (availableQuests.length === 0) {
-                questDiv.innerHTML = '<div class="empty-state">Нет доступных квестов</div>';
+                questDiv.innerHTML = '<div class="empty-state">Нет доступных квестов<br>📜<br>Повышайте уровень, чтобы разблокировать новые квесты!</div>';
                 return;
             }
             
@@ -1105,7 +1210,7 @@
             
             updateUI();
             loadQuests();
-            alert(`Квест завершен!\n+${quest.exp} опыта\n+${quest.gold} золота${quest.item ? '\n+' + quest.item : ''}`);
+            alert(`✅ Квест завершен!\n⭐ +${quest.exp} опыта\n💰 +${quest.gold} золота${quest.item ? '\n🎁 +' + quest.item : ''}`);
         }
 
         // Enter key for login
