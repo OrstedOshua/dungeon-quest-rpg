@@ -3,6 +3,36 @@
 // ⚠️ WARNING: NOT SECURE - ONLY FOR DEMO PURPOSES
 // ═══════════════════════════════════════════════════════════════════
 
+// Fallback WORLD_BOSSES if not defined
+if (typeof WORLD_BOSSES === 'undefined') {
+    var WORLD_BOSSES = [
+        {
+            id: 'titan_golem',
+            name: '🗻 Титан-голем',
+            level: 15,
+            hp: 5000,
+            maxHp: 5000,
+            strength: 90,
+            defense: 35,
+            exp: 2000,
+            gold: 1000,
+            loot: {'Драконобоец': 0.3, 'Драконья чешуя': 0.4, 'Эликсир героя': 1.0}
+        },
+        {
+            id: 'void_dragon',
+            name: '🌌 Дракон Пустоты',
+            level: 20,
+            hp: 10000,
+            maxHp: 10000,
+            strength: 120,
+            defense: 45,
+            exp: 5000,
+            gold: 2500,
+            loot: {'Драконобоец': 0.5, 'Драконья чешуя': 0.6, 'Щит веры': 0.4}
+        }
+    ];
+}
+
 let currentUser = null;
 
 // Переключение между формами
@@ -118,11 +148,19 @@ function login() {
     document.getElementById('logoutButton').classList.remove('hidden');
     
     // Загрузить боевую вкладку
-    loadBattleTab('adventures');
+    if (typeof loadBattleTab === 'function') {
+        loadBattleTab('adventures');
+    }
     
-    updateUI();
-    loadShop();
-    loadQuests();
+    if (typeof updateUI === 'function') {
+        updateUI();
+    }
+    if (typeof loadShop === 'function') {
+        loadShop();
+    }
+    if (typeof loadQuests === 'function') {
+        loadQuests();
+    }
 }
 
 // Выход
@@ -132,12 +170,14 @@ function logout() {
     }
     
     // Сохранить прогресс
-    if (player && currentUser) {
+    if (typeof player !== 'undefined' && player && currentUser) {
         savePlayerData();
     }
     
     currentUser = null;
-    player = null;
+    if (typeof player !== 'undefined') {
+        player = null;
+    }
     localStorage.removeItem('rpg_currentUser');
     
     // Вернуться на экран входа
@@ -223,7 +263,7 @@ function loadPlayerData(username) {
 
 // Сохранение данных игрока
 function savePlayerData() {
-    if (currentUser && player) {
+    if (currentUser && typeof player !== 'undefined' && player) {
         localStorage.setItem(`rpg_player_${currentUser}`, JSON.stringify(player));
     }
 }
@@ -245,9 +285,17 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('gameScreen').classList.remove('hidden');
         document.getElementById('logoutButton').classList.remove('hidden');
         
-        loadBattleTab('adventures');
-        updateUI();
-        loadShop();
-        loadQuests();
+        if (typeof loadBattleTab === 'function') {
+            loadBattleTab('adventures');
+        }
+        if (typeof updateUI === 'function') {
+            updateUI();
+        }
+        if (typeof loadShop === 'function') {
+            loadShop();
+        }
+        if (typeof loadQuests === 'function') {
+            loadQuests();
+        }
     }
 });
