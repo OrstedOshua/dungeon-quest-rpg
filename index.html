@@ -280,7 +280,18 @@
             gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
+        }
+
+        /* Fixed position for combat action buttons */
+        #combatActionButtons {
+            position: sticky;
+            bottom: 0;
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 12px;
             margin-top: 15px;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10;
         }
 
         .monster-display {
@@ -356,7 +367,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3px солид var(--accent-primary);
+            border-left: 3px solid var(--accent-primary);
             transition: transform 0.2s;
         }
 
@@ -421,8 +432,8 @@
         /* Inventory */
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
         }
 
         .inventory-item {
@@ -432,11 +443,12 @@
             text-align: center;
             border: 2px solid var(--border-color);
             transition: all 0.2s;
-            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .inventory-item:hover {
-            transform: scale(1.05);
             border-color: var(--accent-primary);
         }
 
@@ -446,9 +458,21 @@
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 12px;
-            margin-top: 8px;
             display: inline-block;
             font-weight: bold;
+        }
+
+        .inventory-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .inventory-item-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
 
         /* Scrollbar */
@@ -639,12 +663,15 @@
                         
                         <div class="combat-log" id="combatLog"></div>
                         
-                        <div class="combat-buttons" id="combatActionButtons">
-                            <button id="attackButton" class="btn" onclick="attack()">⚔️ Атаковать</button>
-                            <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
-                        </div>
-                        
                         <div id="rewardDisplay" class="reward-display hidden"></div>
+                        
+                        <!-- Fixed combat action buttons -->
+                        <div id="combatActionButtons">
+                            <div class="combat-buttons">
+                                <button id="attackButton" class="btn" onclick="attack()">⚔️ Атаковать</button>
+                                <button class="btn btn-secondary" onclick="fleeCombat()">🏃 Сбежать</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -653,7 +680,7 @@
             <div id="inventoryTab" class="tab-content">
                 <div class="card">
                     <h2>🎒 Инвентарь</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Кликните на зелье, чтобы использовать</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Управляйте своими предметами</p>
                     <div id="inventoryItems" class="inventory-grid"></div>
                 </div>
             </div>
@@ -865,7 +892,7 @@
             document.getElementById('equippedArmor').textContent = player.armor || 'Нет';
             document.getElementById('equippedAccessory').textContent = player.accessory || 'Нет';
             
-            // Inventory
+            // Inventory with action buttons
             const invDiv = document.getElementById('inventoryItems');
             invDiv.innerHTML = '';
             const hasItems = Object.keys(player.inventory).length > 0;
@@ -875,13 +902,41 @@
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'inventory-item';
                     const itemData = ITEMS.find(i => i.name === item);
-                    if (itemData && itemData.type === 'consumable') {
-                        itemDiv.onclick = () => useItem(item);
-                        itemDiv.title = 'Кликните, чтобы использовать';
+                    
+                    let statsHtml = '';
+                    if (itemData) {
+                        if (itemData.damage) statsHtml += `⚔️ +${itemData.damage} `;
+                        if (itemData.defense) statsHtml += `🛡️ +${itemData.defense} `;
+                        if (itemData.heal) statsHtml += `❤️ +${itemData.heal} `;
                     }
+                    
+                    let buttonHtml = '';
+                    if (itemData) {
+                        if (itemData.type === 'consumable') {
+                            buttonHtml = `<button class="btn btn-success btn-small" onclick="useItem('${item}')">🍷 Выпить</button>`;
+                        } else if (itemData.type === 'weapon') {
+                            const isEquipped = player.weapon === item;
+                            buttonHtml = isEquipped 
+                                ? `<button class="btn btn-secondary btn-small" onclick="unequipItem('weapon')">✖ Снять</button>`
+                                : `<button class="btn btn-success btn-small" onclick="equipItem('${item}')">✓ Экипировать</button>`;
+                        } else if (itemData.type === 'armor') {
+                            const isEquipped = player.armor === item;
+                            buttonHtml = isEquipped 
+                                ? `<button class="btn btn-secondary btn-small" onclick="unequipItem('armor')">✖ Снять</button>`
+                                : `<button class="btn btn-success btn-small" onclick="equipItem('${item}')">✓ Экипировать</button>`;
+                        } else if (itemData.type === 'accessory') {
+                            const isEquipped = player.accessory === item;
+                            buttonHtml = isEquipped 
+                                ? `<button class="btn btn-secondary btn-small" onclick="unequipItem('accessory')">✖ Снять</button>`
+                                : `<button class="btn btn-success btn-small" onclick="equipItem('${item}')">✓ Экипировать</button>`;
+                        }
+                    }
+                    
                     itemDiv.innerHTML = `
-                        <div style="font-size: 14px; font-weight: 600;">${item}</div>
+                        <div class="inventory-item-name">${item}</div>
+                        <div class="inventory-item-desc">${statsHtml}</div>
                         <span class="item-count">x${count}</span>
+                        ${buttonHtml}
                     `;
                     invDiv.appendChild(itemDiv);
                 }
@@ -890,6 +945,61 @@
             }
             
             savePlayer();
+        }
+
+        // Equip item from inventory
+        function equipItem(itemName) {
+            const item = ITEMS.find(i => i.name === itemName);
+            if (!item) return;
+            
+            if (!player.inventory[itemName] || player.inventory[itemName] <= 0) {
+                alert('У вас нет этого предмета!');
+                return;
+            }
+            
+            if (player.level < item.level) {
+                alert(`Нужен уровень ${item.level}!`);
+                return;
+            }
+            
+            if (item.type === 'weapon') {
+                player.weapon = itemName;
+            } else if (item.type === 'armor') {
+                player.armor = itemName;
+            } else if (item.type === 'accessory') {
+                player.accessory = itemName;
+            }
+            
+            // Remove from inventory
+            player.inventory[itemName]--;
+            if (player.inventory[itemName] <= 0) {
+                delete player.inventory[itemName];
+            }
+            
+            updateUI();
+            alert(`✅ Экипировано: ${itemName}`);
+        }
+
+        // Unequip item
+        function unequipItem(slot) {
+            let itemName = null;
+            if (slot === 'weapon') {
+                itemName = player.weapon;
+                player.weapon = 'Деревянный меч';
+            } else if (slot === 'armor') {
+                itemName = player.armor;
+                player.armor = 'Тканевая броня';
+            } else if (slot === 'accessory') {
+                itemName = player.accessory;
+                player.accessory = null;
+            }
+            
+            if (itemName && itemName !== 'Деревянный меч' && itemName !== 'Тканевая броня') {
+                player.inventory[itemName] = (player.inventory[itemName] || 0) + 1;
+            }
+            
+            updateUI();
+            alert(`✅ Снято: ${itemName}`);
         }
 
         // Use consumable item
@@ -947,7 +1057,7 @@
             document.getElementById('combatLog').innerHTML = '<div class="log-entry">⚔️ Бой начался!</div>';
             document.getElementById('rewardDisplay').classList.add('hidden');
             
-            // В бою кнопка внизу должна быть "Атаковать"
+            // In combat - attack button
             const attackBtn = document.getElementById('attackButton');
             attackBtn.textContent = '⚔️ Атаковать';
             attackBtn.onclick = attack;
@@ -1050,7 +1160,7 @@
             updateUI();
             loadQuests();
             
-            // После победы кнопка Атаковать превращается в Искать противника
+            // After victory - search button
             const attackBtn = document.getElementById('attackButton');
             attackBtn.textContent = '🗡️ Искать противника';
             attackBtn.onclick = startCombat;
@@ -1160,10 +1270,25 @@
             
             player.gold -= item.price;
             
-            if (item.type === 'weapon') player.weapon = item.name;
-            else if (item.type === 'armor') player.armor = item.name;
-            else if (item.type === 'accessory') player.accessory = item.name;
-            else if (item.type === 'consumable') {
+            if (item.type === 'weapon') {
+                // Put old weapon to inventory
+                if (player.weapon && player.weapon !== 'Деревянный меч') {
+                    player.inventory[player.weapon] = (player.inventory[player.weapon] || 0) + 1;
+                }
+                player.weapon = item.name;
+            } else if (item.type === 'armor') {
+                // Put old armor to inventory
+                if (player.armor && player.armor !== 'Тканевая броня') {
+                    player.inventory[player.armor] = (player.inventory[player.armor] || 0) + 1;
+                }
+                player.armor = item.name;
+            } else if (item.type === 'accessory') {
+                // Put old accessory to inventory
+                if (player.accessory) {
+                    player.inventory[player.accessory] = (player.inventory[player.accessory] || 0) + 1;
+                }
+                player.accessory = item.name;
+            } else if (item.type === 'consumable') {
                 player.inventory[item.name] = (player.inventory[item.name] || 0) + 1;
             }
             
